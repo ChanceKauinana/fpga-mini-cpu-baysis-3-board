@@ -1,0 +1,21 @@
+# Vivado generated files
+vivado/
+*.jou
+*.log
+*.pb
+*.wdf
+*.xml
+*.rpt
+*.dcp
+*.vds
+*.wpc
+*.ini
+*.db
+*.exe
+*.bat
+*.sh
+
+# Simulation output
+*.wdb
+*.sdb
+xsim.dir/
