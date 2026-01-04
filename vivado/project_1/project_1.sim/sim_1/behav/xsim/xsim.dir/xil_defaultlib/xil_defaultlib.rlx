@@ -1,0 +1,7 @@
+0.7
+2020.2
+Nov 14 2025
+19:37:27
+C:/fpga-mini-cpu-baysis-3-board/rtl/cpu_top.sv,1767501767,systemVerilog,,C:/fpga-mini-cpu-baysis-3-board/tb/cpu_top_tb.sv,,cpu_top,,uvm,../../../../../../../AMDDesignTools/2025.2/Vivado/data/rsb/busdef,,,,,
+C:/fpga-mini-cpu-baysis-3-board/tb/cpu_top_tb.sv,1767501832,systemVerilog,,,,cpu_top_tb,,uvm,../../../../../../../AMDDesignTools/2025.2/Vivado/data/rsb/busdef,,,,,
+C:/fpga-mini-cpu-baysis-3-board/vivado/project_1/project_1.sim/sim_1/behav/xsim/glbl.v,1756381829,verilog,,,,glbl,,uvm,,,,,,
