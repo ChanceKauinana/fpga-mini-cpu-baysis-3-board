@@ -13,6 +13,10 @@ module cpu_top_tb;
     logic [15:0] rs_val_dbg;
     logic [15:0] rt_val_dbg;
     logic [15:0] alu_out_dbg;
+    
+    logic       rf_we_dbg;
+    logic [3:0] rd_dbg;
+    
 
     cpu_top dut (
         .clk(clk),
@@ -25,7 +29,9 @@ module cpu_top_tb;
         .rt_dbg(rt_dbg),
         .rs_val_dbg(rs_val_dbg),
         .rt_val_dbg(rt_val_dbg),
-        .alu_out_dbg(alu_out_dbg)
+        .alu_out_dbg(alu_out_dbg),
+        .rd_dbg(rd_dbg),
+        .rf_we_dbg(rf_we_dbg)
     );
 
     // 100 MHz clock = 10 ns period

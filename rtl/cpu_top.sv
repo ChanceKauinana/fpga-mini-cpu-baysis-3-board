@@ -12,8 +12,10 @@ module cpu_top (
     output logic [3:0]  rt_dbg,
     output logic [15:0] rs_val_dbg,
     output logic [15:0] rt_val_dbg,
-    output logic [15:0] alu_out_dbg
+    output logic [15:0] alu_out_dbg,
 
+    output logic [3:0] rd_dbg,
+    output logic       rf_we_dbg
 );
 
     // ----------------------------
@@ -39,12 +41,14 @@ module cpu_top (
     // Decode fields from IR
         // Format (16-bit):
     // [15:12] opcode
+    // [11:8]  rd
     // [7:4]   rs
     // [3:0]   rt
     // ----------------------------
-    logic [3:0] opcode, rs, rt;
+    logic [3:0] opcode, rd, rs, rt;
 
     assign opcode = ir[15:12];
+    assign rd     = ir[11:8];
     assign rs     = ir[7:4];
     assign rt     = ir[3:0];
 
@@ -53,6 +57,10 @@ module cpu_top (
     // ----------------------------
     logic [15:0] rf [0:7];
     logic [15:0] rf_rs_data, rf_rt_data;
+    
+    logic        rf_we;
+    logic [2:0]  rf_waddr;
+    logic [15:0] rf_wdata;
 
     assign rf_rs_data = rf[rs[2:0]];
     assign rf_rt_data = rf[rt[2:0]];
@@ -102,17 +110,17 @@ module cpu_top (
     logic [15:0] imem [0:255];
 
     initial begin
-        // opcode=1 ADD, rs=1, rt=2 => 20 + 30 = 50
-        imem[8'd0] = 16'h1012;
+        // ADD  r5 = r1 + r2  => 20 + 30 = 50
+        imem[8'd0] = 16'h1512; // opcode=1, rd=5, rs=1, rt=2
 
-        // opcode=2 SUB, rs=4, rt=3 => 50 - 40 = 10
-        imem[8'd1] = 16'h2043;
+        // SUB  r6 = r4 - r3  => 50 - 40 = 10
+        imem[8'd1] = 16'h2643; // opcode=2, rd=6, rs=4, rt=3
 
-        // opcode=3 AND, rs=6, rt=7
-        imem[8'd2] = 16'h3067;
+        // AND  r7 = r6 & r7  => after r6 becomes 10, this becomes 10 & 80 = 0
+        imem[8'd2] = 16'h3767; // opcode=3, rd=7, rs=6, rt=7
 
-        // opcode=4 OR,  rs=1, rt=3
-        imem[8'd3] = 16'h4013;
+        // OR   r5 = r5 | r3  => after r5 becomes 50, 50 | 40 = 58
+        imem[8'd3] = 16'h4553; // opcode=4, rd=5, rs=5, rt=3
     end
 
     // ----------------------------
@@ -129,6 +137,10 @@ module cpu_top (
             pc    <= pc_next;
             ir    <= ir_next;
             alu_out <= alu_out_next;
+        end
+        
+        if (rf_we) begin
+            rf[rf_waddr] <= rf_wdata;
         end
     end
 
@@ -156,6 +168,10 @@ module cpu_top (
         ir_next = ir;
         alu_out_next = alu_out;
         
+        rf_we    = 1'b0;
+        rf_waddr = 3'b0;
+        rf_wdata = 16'd0;
+        
         case (state)
             S_FETCH: begin
                 // Fetch instruction at current PC into IR
@@ -168,6 +184,15 @@ module cpu_top (
                 alu_out_next = alu_result; //gets the ALU result on clock edge
             end
             
+            S_WB: begin
+                // For ALU ops, it writes ALUOut into rd
+                if (opcode == OP_ADD || opcode == OP_SUB || opcode == OP_AND || opcode == OP_OR) begin
+                    rf_we    = 1'b1;
+                    rf_waddr = rd[2:0];
+                    rf_wdata = alu_out;
+                end
+            end
+                
             default: begin
                 // other states do nothing yet
             end
@@ -184,5 +209,8 @@ module cpu_top (
     assign rs_val_dbg = rf_rs_data;
     assign rt_val_dbg = rf_rt_data;
     assign alu_out_dbg = alu_out;
+    
+    assign rf_we_dbg = rf_we;
+    assign rd_dbg = rd;
 
 endmodule
